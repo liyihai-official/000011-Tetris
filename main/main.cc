@@ -7,7 +7,7 @@
 int main() {
 
   InitWindow(HORIZON_SIZE, VERTICAL_SIZE, "Tetris on macOS");
-  SetTargetFPS(30);  // 设置帧率
+  SetTargetFPS(120);  // 设置帧率
 
   // float loc_x = 10.0f;
   // float loc_y = 10.0f;
@@ -15,7 +15,7 @@ int main() {
   // // 定义速度变量，控制格子的运动
   // float speed_x = 2.0f;
   float speed_y = 20.0f;
-  tetris::coord loc(30, 20);
+  tetris::coord loc(0, 0);
 
 
   while (!WindowShouldClose()) {  // 主游戏循环，直到窗口关闭
@@ -25,31 +25,37 @@ int main() {
       0.1f, 6, WHITE);
 
 
+
+    tetris::utility::block b (
+      tetris::block_type::L, 
+      60
+    );
+    b.draw();
   //   // 更新格子的坐标
   //   loc_x += speed_x;
-    loc.y += speed_y;
-    tetris::utility::cell c (loc);
-    std::array<tetris::coord, BLOCK_CELL_COUNT> position;
+    // loc.y += speed_y;
+    // tetris::utility::cell c (loc);
+    // std::array<tetris::coord, BLOCK_CELL_COUNT> position;
 
-    position[0] = loc + tetris::coord(1, 0) * __cell_size__;
-    position[1] = loc + tetris::coord(1, 1) * __cell_size__;
-    position[2] = loc + tetris::coord(1, 2) * __cell_size__;
+    // position[0] = loc + tetris::coord(1, 0) * __cell_size__;
+    // position[1] = loc + tetris::coord(1, -1) * __cell_size__;
+    // position[2] = loc + tetris::coord(1, -2) * __cell_size__;
 
-    tetris::utility::cell b (position[1]);
-    tetris::utility::cell e (position[2]);
-    tetris::utility::cell d (position[0]);
+    // tetris::utility::cell b (position[1]);
+    // tetris::utility::cell e (position[2]);
+    // tetris::utility::cell d (position[0]);
     
-    c.draw();
-    b.draw();
-    e.draw();
-    d.draw();
+    // c.draw();
+    // b.draw();
+    // e.draw();
+    // d.draw();
 
-    if (position[2].y >= VERTICAL_SIZE - __cell_size__)
-    {
-      // speed_y = 0;
-      loc.y = 20;
-      loc.x += 10;
-    }
+    // if (position[2].y >= VERTICAL_SIZE - __cell_size__)
+    // {
+    //   // speed_y = 0;
+    //   loc.y = 20;
+    //   loc.x += 10;
+    // }
 
   //   // 检测边界并反弹
   //   if (loc_x <= 0 || loc_x >= (HORIZON_SIZE - __cell_size__)) {
