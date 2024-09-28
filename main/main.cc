@@ -2,26 +2,33 @@
 #include <profile.hpp>
 #include <grid.hpp>
 #include <iostream>
+#include <unistd.h>
 
 int main() {
 
   InitWindow(HORIZON_SIZE, VERTICAL_SIZE, "Tetris on macOS");
-  SetTargetFPS(120);  // 设置帧率
+  SetTargetFPS(30);  // 设置帧率
 
   // float loc_x = 10.0f;
   // float loc_y = 10.0f;
 
   // // 定义速度变量，控制格子的运动
   // float speed_x = 2.0f;
-  // float speed_y = 2.0f;
-  tetris::coord loc(10, 20);
-  tetris::utility::cell c (loc);
+  float speed_y = 20.0f;
+  tetris::coord loc(30, 20);
 
 
   while (!WindowShouldClose()) {  // 主游戏循环，直到窗口关闭
+    BeginDrawing();
+    DrawRectangleRounded(
+      (Rectangle){0, 0, HORIZON_SIZE * 2.0 / 3.0, VERTICAL_SIZE}, 
+      0.1f, 6, WHITE);
+
+
   //   // 更新格子的坐标
   //   loc_x += speed_x;
-  //   // loc_y += speed_y;
+    loc.y += speed_y;
+    tetris::utility::cell c (loc);
     std::array<tetris::coord, BLOCK_CELL_COUNT> position;
 
     position[0] = loc + tetris::coord(1, 0) * __cell_size__;
@@ -36,7 +43,14 @@ int main() {
     b.draw();
     e.draw();
     d.draw();
-    
+
+    if (position[2].y >= VERTICAL_SIZE - __cell_size__)
+    {
+      // speed_y = 0;
+      loc.y = 20;
+      loc.x += 10;
+    }
+
   //   // 检测边界并反弹
   //   if (loc_x <= 0 || loc_x >= (HORIZON_SIZE - __cell_size__)) {
   //       speed_x *= -1;  // 反转 X 轴速度
@@ -46,19 +60,20 @@ int main() {
   //   }
 
   //   // 开始绘制
-  //   BeginDrawing();
-  //   ClearBackground(BLACK);  // 设置背景颜色为黑色
+
+    ClearBackground(BLACK);  // 设置背景颜色为黑色
 
   //   // 显示文本
   //   DrawText("Hello Raylib on macOS!", 190, 200, 20, LIGHTGRAY);
 
   //   // 绘制矩形
-  //   DrawRectangleRounded((Rectangle){320, 55, 170, 60}, 0.3f, 6, DARKGRAY);
+    
 
   //   // 绘制移动的蓝色格子
   //   DrawRectangleRounded((Rectangle){loc_x, loc_y, 10, 10}, 0.0f, 1, DARKBLUE);
 
     EndDrawing();
+    sleep(1); 
   }
 
   // CloseWindow();  // 关闭窗口并释放资源
