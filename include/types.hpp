@@ -27,8 +27,49 @@ namespace tetris {
 
   using String          = std::string;
 
+  typedef Byte          direction;
   typedef Word          size_type;
   typedef Qword         super_size_type;
+  
+
+
+  struct coord {
+    coord() : x {0}, y {0} {}
+    coord(Float x, Float y) : x {x}, y {y} {}
+    coord operator+(const coord & other) noexcept
+      { return coord(x+other.x, y+other.y); }
+
+    coord operator-(const coord & other) noexcept 
+      { return coord(x-other.x, y-other.y); }
+
+    coord operator*(const Float mpl) noexcept
+      { return coord(x*mpl, y*mpl); }
+
+    Float x, y;
+  };
+  
+
+  
+  enum orientation 
+  : direction
+  {
+    North,
+    South,
+    East,
+    West
+  }; // enumerate orientation
+
+  enum block_type
+  : Byte
+  {
+    L,
+    Lmir,
+    Z,
+    Zmir,
+    Cube,
+    Bar,
+    Py
+  }; // enumerate block_type
 
 }
 
