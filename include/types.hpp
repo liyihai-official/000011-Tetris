@@ -10,13 +10,15 @@
 
 #include <cstdint>
 #include <string>
+#include <profile.hpp>
+#include <array>
 
 namespace tetris {
 
-  using Byte  = uint8_t;
-  using Word  = uint16_t;
-  using Dword = uint32_t;
-  using Qword = uint64_t;
+  using Byte    = uint8_t;
+  using Word    = uint16_t;
+  using Dword   = uint32_t;
+  using Qword   = uint64_t;
 
   using Integer         = int;
   using UnsignedInteger = unsigned int;
@@ -30,47 +32,17 @@ namespace tetris {
   typedef Byte          direction;
   typedef Word          size_type;
   typedef Qword         super_size_type;
-  
 
+  enum orientation  : direction
+  { North, South, East, West }; // enumerate orientation
 
-  struct coord {
-    coord() : x {0}, y {0} {}
-    coord(Float x, Float y) : x {x}, y {y} {}
-    coord operator+(const coord & other) noexcept
-      { return coord(x+other.x, y+other.y); }
+  enum block_type   : Byte
+  { L, Lmir, Z, Zmir, Cube, Bar, Py }; // enumerate block_type
 
-    coord operator-(const coord & other) noexcept 
-      { return coord(x-other.x, y-other.y); }
-
-    coord operator*(const Float mpl) noexcept
-      { return coord(x*mpl, y*mpl); }
-
-    Float x, y;
-  };
-  
-
-  
-  enum orientation 
-  : direction
-  {
-    North,
-    South,
-    East,
-    West
-  }; // enumerate orientation
-
-  enum block_type
-  : Byte
-  {
-    L,
-    Lmir,
-    Z,
-    Zmir,
-    Cube,
-    Bar,
-    Py
-  }; // enumerate block_type
-
+  enum class cell_color 
+  { Black, White, Blue, Red, Green, Yellow, Purple };
 }
+
+
 
 #endif // end of define TETRIS_TYPES_HPP

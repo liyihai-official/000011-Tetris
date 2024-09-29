@@ -14,23 +14,35 @@ int main() {
 
   // // 定义速度变量，控制格子的运动
   // float speed_x = 2.0f;
-  float speed_y = 20.0f;
-  tetris::coord loc(0, 0);
+  // float speed_y = 20.0f;
+  tetris::coord loc(0, 80);
 
 
+  tetris::utility::block b (
+    tetris::block_type::L, 
+    0
+  );
+
+  tetris::utility::block c (
+    tetris::block_type::Py, 
+    100
+  );
+
+  tetris::utility::grid g;
+  
   while (!WindowShouldClose()) {  // 主游戏循环，直到窗口关闭
     BeginDrawing();
-    DrawRectangleRounded(
-      (Rectangle){0, 0, HORIZON_SIZE * 2.0 / 3.0, VERTICAL_SIZE}, 
-      0.1f, 6, WHITE);
+    ClearBackground(WHITE);  // 设置背景颜色为黑色
+    g.draw();
+    // DrawRectangleRounded(
+    //   (Rectangle){0, 0, HORIZON_SIZE * 2.0 / 3.0, VERTICAL_SIZE}, 
+    //   0.1f, 6, WHITE);
 
 
-
-    tetris::utility::block b (
-      tetris::block_type::L, 
-      60
-    );
-    b.draw();
+    // c.rotate_clockwise();
+    // b.rotate_clockwise();
+    // b.draw();
+    // c.draw();
   //   // 更新格子的坐标
   //   loc_x += speed_x;
     // loc.y += speed_y;
@@ -67,7 +79,7 @@ int main() {
 
   //   // 开始绘制
 
-    ClearBackground(BLACK);  // 设置背景颜色为黑色
+    
 
   //   // 显示文本
   //   DrawText("Hello Raylib on macOS!", 190, 200, 20, LIGHTGRAY);
