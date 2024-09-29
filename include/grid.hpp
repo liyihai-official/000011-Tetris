@@ -73,9 +73,10 @@ class grid
   grid()      noexcept;
 
   void draw() noexcept;
+  void ClearFullRow() noexcept;
 
   private:
-  void ClearFullRow() noexcept;
+  
   std::array<std::array<cell_color, HORIZON_NUM>, VERTICAL_SIZE> world;
 
 }; // class grid

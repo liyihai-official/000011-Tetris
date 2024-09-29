@@ -14,8 +14,8 @@ constexpr tetris::size_type __cell_size__ {20};
 
 
 #if !defined(HORIZON_NUM) || !defined(VERTICAL_NUM)
-  #define HORIZON_NUM    30
-  #define VERTICAL_NUM   30 
+  #define HORIZON_NUM    5
+  #define VERTICAL_NUM   8
   #define HORIZON_SIZE   (HORIZON_NUM  * __cell_size__)
   #define VERTICAL_SIZE  (VERTICAL_NUM * __cell_size__)
 #endif

@@ -6,7 +6,7 @@
 
 int main() {
 
-  InitWindow(HORIZON_SIZE, VERTICAL_SIZE, "Tetris on macOS");
+  InitWindow(HORIZON_SIZE+__cell_size__, VERTICAL_SIZE+__cell_size__, "Tetris on macOS");
   SetTargetFPS(120);  // 设置帧率
 
   // float loc_x = 10.0f;
@@ -33,7 +33,11 @@ int main() {
   while (!WindowShouldClose()) {  // 主游戏循环，直到窗口关闭
     BeginDrawing();
     ClearBackground(WHITE);  // 设置背景颜色为黑色
+    
     g.draw();
+    g.ClearFullRow();
+    // tetris::utility::grid other;
+    // g = other;
     // DrawRectangleRounded(
     //   (Rectangle){0, 0, HORIZON_SIZE * 2.0 / 3.0, VERTICAL_SIZE}, 
     //   0.1f, 6, WHITE);

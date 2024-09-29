@@ -134,26 +134,35 @@ grid::grid() noexcept
 { 
   for (auto & row : world) row.fill(cell_color::Black); 
 
-  for (int r = HORIZON_NUM - 3; r >= 27; --r)
-    for (int c = 0; c < VERTICAL_NUM; ++c)
-    {
-      if (c < 6) world[r][c] = cell_color::Purple;
-      else if (9 < c && c < 18) world[r][c] = cell_color::Blue;
-    }
 
-  for (int r = HORIZON_NUM - 2; r >= 28; --r)
-    for (int c = 0; c < VERTICAL_NUM; ++c)
+  // for (int r = HORIZON_NUM - 3; r >= 27; --r)
+  //   for (int c = 0; c < VERTICAL_NUM; ++c)
+  //   {
+  //     if ( 8 < c && c < 12) world[r][c] = cell_color::Purple;
+  //     else if (16 < c && c < 19) world[r][c] = cell_color::Red;
+  //   }
+
+
+  // for (int r = HORIZON_NUM - 3; r >= 27; --r)
+  //   for (int c = 0; c < VERTICAL_NUM; ++c)
+  //   {
+  //     if (c < 6) world[r][c] = cell_color::Purple;
+  //     else if (9 < c && c < 18) world[r][c] = cell_color::Blue;
+  //   }
+
+  for (int r = VERTICAL_NUM - 2; r >= VERTICAL_NUM - 2; --r)
+    for (int c = 0; c < HORIZON_NUM; ++c)
     {
-      if (c < 8) world[r][c] = cell_color::Green;
-      else if (8 < c && c < 14) world[r][c] = cell_color::Red;
+      if (c < 2) world[r][c] = cell_color::Green;
+      else if (2 < c && c < 4) world[r][c] = cell_color::Red;
       else world[r][c] = cell_color::Purple;
     }
 
-  for (int r = HORIZON_NUM - 1; r >= 29; --r)
-    for (int c = 0; c < VERTICAL_NUM; ++c)
+  for (int r = VERTICAL_NUM - 1; r >= VERTICAL_NUM - 1; --r)
+    for (int c = 0; c < HORIZON_NUM; ++c)
     {
-      if (c < 4) world[r][c] = cell_color::Purple;
-      else if (4 < c && c < 10) world[r][c] = cell_color::Blue;
+      if (c < 2) world[r][c] = cell_color::Purple;
+      else if (3 < c && c < 5) world[r][c] = cell_color::Black;
       else world[r][c] = cell_color::Yellow;
     }
 }
@@ -161,22 +170,40 @@ grid::grid() noexcept
 void 
 grid::ClearFullRow() noexcept
 {
-  // for (int r = 0; r < HORIZON_NUM; ++r)
-  // {
-  //   Bool isRowFull { true };
-  //   for (int c = 0; c < VERTICAL_NUM; ++c)
-  //   {
-  //     if (world[r][c] == cell_color::Black) isRowFull == false; break;
-  //   }
-  // }
+  for (int r = VERTICAL_NUM - 1; r >= 0; --r)
+  {
+    int cell_count { 0 };
+    for (int c = 0; c < HORIZON_NUM; ++c)
+    {
+      if (world[r][c] != cell_color::Black) ++cell_count;
+    }
+
+
+    std::cout << "Row : " << r << " has " << cell_count << "/" << HORIZON_NUM << " cells. " << std::endl;
+    if (cell_count == HORIZON_NUM)
+    {
+      std::cout << "Row : " << r << " is Full " << std::endl;
+      // for (int r_above = r; r_above >= 0; --r_above)
+      // {
+      //   // std::cout << r_above << "/" << HORIZON_NUM << "\t" << << std::endl;
+      //   for (int c = 0; c < VERTICAL_NUM; ++c)
+      //   {
+          
+      //     if (r_above == 0) world[r_above][c] = cell_color::Black;
+      //     else world[r_above][c] = world[r_above-1][c];
+      //   }
+      // }
+    }
+  }
+  std::cout << std::endl;
 }
 
 void 
 grid::draw() noexcept
 {
-  ClearFullRow();
-for (int r = 0; r < HORIZON_NUM; ++r)
-  for (int c = 0; c < VERTICAL_NUM; ++c)
+  // ClearFullRow();
+for (int r = 0; r < VERTICAL_NUM; ++r)
+  for (int c = 0; c < HORIZON_NUM; ++c)
   DrawRectangle(
     c*__cell_size__, r*__cell_size__, 
     __cell_size__, __cell_size__,
