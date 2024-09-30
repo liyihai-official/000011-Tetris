@@ -34,9 +34,6 @@ int main() {
     BeginDrawing();
     ClearBackground(WHITE);  // 设置背景颜色为黑色
 
-
-
-
     g.draw();
     g.ClearFullRow();
     // tetris::utility::grid other;

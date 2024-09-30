@@ -135,20 +135,21 @@ grid::grid() noexcept
   for (auto & row : world) row.fill(cell_color::Black); 
 
 
-  // for (int r = HORIZON_NUM - 3; r >= 27; --r)
-  //   for (int c = 0; c < VERTICAL_NUM; ++c)
-  //   {
-  //     if ( 8 < c && c < 12) world[r][c] = cell_color::Purple;
-  //     else if (16 < c && c < 19) world[r][c] = cell_color::Red;
-  //   }
+  for (int r = VERTICAL_NUM - 4; r >= VERTICAL_NUM - 4; --r)
+    for (int c = 0; c < HORIZON_NUM; ++c)
+    {
+      if (c < 2) world[r][c] = cell_color::Green;
+      else if (2 < c && c < 4) world[r][c] = cell_color::Red;
+      else world[r][c] = cell_color::Purple;
+    }
 
-
-  // for (int r = HORIZON_NUM - 3; r >= 27; --r)
-  //   for (int c = 0; c < VERTICAL_NUM; ++c)
-  //   {
-  //     if (c < 6) world[r][c] = cell_color::Purple;
-  //     else if (9 < c && c < 18) world[r][c] = cell_color::Blue;
-  //   }
+  for (int r = VERTICAL_NUM - 3; r >= VERTICAL_NUM - 3; --r)
+    for (int c = 0; c < HORIZON_NUM; ++c)
+    {
+      if (c < 2) world[r][c] = cell_color::Purple;
+      else if (3 < c && c < 5) world[r][c] = cell_color::Black;
+      else world[r][c] = cell_color::Yellow;
+    }
 
   for (int r = VERTICAL_NUM - 2; r >= VERTICAL_NUM - 2; --r)
     for (int c = 0; c < HORIZON_NUM; ++c)
@@ -178,23 +179,22 @@ grid::ClearFullRow() noexcept
       if (world[r][c] != cell_color::Black) ++cell_count;
     }
 
-
     std::cout << "Row : " << r << " has " << cell_count << "/" << HORIZON_NUM << " cells. " << std::endl;
     if (cell_count == HORIZON_NUM)
     {
       std::cout << "Row : " << r << " is Full " << std::endl;
-      // for (int r_above = r; r_above >= 0; --r_above)
-      // {
-      //   // std::cout << r_above << "/" << HORIZON_NUM << "\t" << << std::endl;
-      //   for (int c = 0; c < VERTICAL_NUM; ++c)
-      //   {
-          
-      //     if (r_above == 0) world[r_above][c] = cell_color::Black;
-      //     else world[r_above][c] = world[r_above-1][c];
-      //   }
-      // }
+      
+      for (int r_above = r; r_above >= 0; --r_above)
+      {
+        for (int c = 0; c < HORIZON_NUM; ++c)
+        {
+          if (r_above == 0) world[r_above][c] = cell_color::Black;
+          else world[r_above][c] = world[r_above-1][c];
+        }
+      }
     }
   }
+  
   std::cout << std::endl;
 }
 
