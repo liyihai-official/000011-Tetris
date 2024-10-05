@@ -58,8 +58,9 @@ int main() {
     // b.rotate_clockwise();
     // b.draw();
     // c.draw();
-  //   // 更新格子的坐标
-  //   loc_x += speed_x;
+
+    // // 更新格子的坐标
+    // loc_x += speed_x;
     // loc.y += speed_y;
     // tetris::utility::cell c (loc);
     // std::array<tetris::coord, BLOCK_CELL_COUNT> position;

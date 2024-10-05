@@ -59,16 +59,16 @@ class grid
 class cell 
 {
   public:
-  cell()                        noexcept;
-  cell(const cell &)            noexcept = default; 
-  cell(cell&&)                  noexcept = default;
-  cell& operator=(cell &&)      noexcept = default;
-  cell& operator=(const cell&)  noexcept = default;
+  cell()                            noexcept;
+  cell(const cell &)                noexcept = default; 
+  cell(cell&&)                      noexcept = default;
+  cell& operator=(cell &&)          noexcept = default;
+  cell& operator=(const cell&)      noexcept = default;
   cell& operator+=(const coord &)   noexcept; 
   cell& operator-=(const coord &)   noexcept; 
-  ~cell()                       noexcept = default;
+  ~cell()                           noexcept = default;
 
-  cell(coord)                   noexcept;
+  cell(coord)                       noexcept;
 
   void draw();
 
