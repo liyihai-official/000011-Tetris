@@ -18,6 +18,12 @@ Color GetColorFromEnum(cell_color color) {
 cell::cell()          noexcept {};
 cell::cell(coord loc) noexcept : loc {loc} {}
 
+cell& cell::operator+=(const coord & momentum) noexcept
+{ loc += momentum; return *this; }
+
+cell& cell::operator-=(const coord & momentum) noexcept
+{ loc -= momentum; return *this; }
+
 void 
 cell::draw()
 {
@@ -34,6 +40,7 @@ block::block(
 , const Float & x) noexcept
 : type {type}
 , body {std::make_unique<cell[]>(BLOCK_CELL_COUNT)}
+, default_momentum {coord(0, 0.5)}
 {
   coord loc (x, 80);
   std::cout << "Calling Block Constructor" 
@@ -89,11 +96,47 @@ switch (type)
 }
 
 
+// block& 
+// block::operator+=(const coord & momentum)
+// {
+//   for (int i = 0; i < BLOCK_CELL_COUNT; ++i)
+//   {
+//     body[i] += momentum;
+//   }
+//   return *this;
+// }
 
 
 void 
 block::move()
 {
+  int UserPress { GetKeyPressed() };
+  coord Momentum { default_momentum };
+  
+  switch (UserPress)
+  {
+    case KEY_LEFT:
+      Momentum -= coord(__cell_size__, 0);
+      break;
+    case KEY_RIGHT:
+      Momentum += coord(__cell_size__, 0);
+      break;
+    case KEY_DOWN:
+      Momentum += coord(0, __cell_size__);
+      break;
+    case KEY_UP:
+      rotate_clockwise();
+      break;
+    case KEY_SPACE:
+      break;
+    default:
+      break;
+  }
+
+  for (int i = 0; i < BLOCK_CELL_COUNT; ++i) 
+  {
+    body[i] += Momentum;
+  }
 
 }
 
@@ -132,9 +175,11 @@ default: break;
 
 grid::grid() noexcept
 { 
+  UpperBound.fill(HORIZON_SIZE);
   for (auto & row : world) row.fill(cell_color::Black); 
+  
 
-
+////////////////////////////////////////////////////////////////////////////////////////
   for (int r = VERTICAL_NUM - 4; r >= VERTICAL_NUM - 4; --r)
     for (int c = 0; c < HORIZON_NUM; ++c)
     {
@@ -166,11 +211,41 @@ grid::grid() noexcept
       else if (3 < c && c < 5) world[r][c] = cell_color::Black;
       else world[r][c] = cell_color::Yellow;
     }
+////////////////////////////////////////////////////////////////////////////////////////
+
+
 }
 
 void 
-grid::ClearFullRow() noexcept
+grid::UpdateUpperBound() noexcept 
 {
+  for (size_type j = 0; j < HORIZON_NUM; ++j)
+  {
+    size_type Up {0};
+    // while 
+    // for (size_type i = 0; i < VERTICAL_NUM; ++i)
+    // {
+
+    // }
+  }
+
+
+}
+
+void 
+grid::ClearFullRows() noexcept
+{
+  for (size_type j = 0; j < HORIZON_NUM; ++j)
+  {
+    size_type i {0};
+    while (world[i][j] == cell_color::Black)
+    { 
+      ++i;
+      if ( i == VERTICAL_NUM ) break;
+    }
+    std::cout << "Col : " << j << "'s Upper is " << i << std::endl;
+  }
+
   for (int r = VERTICAL_NUM - 1; r >= 0; --r)
   {
     int cell_count { 0 };
@@ -194,14 +269,27 @@ grid::ClearFullRow() noexcept
       }
     }
   }
-  
+
   std::cout << std::endl;
+
+  // for (size_type j = 0; j < HORIZON_NUM; ++j)
+  // {
+  //   size_type i {0};
+  //   while (world[i][j] == cell_color::Black)
+  //   { 
+  //     ++i;
+  //     if ( i == VERTICAL_NUM ) break;
+  //   }
+  //   std::cout << "Col : " << j << "'s Upper is " << i << std::endl;
+  // }
 }
+
+
+
 
 void 
 grid::draw() noexcept
 {
-  // ClearFullRow();
 for (int r = 0; r < VERTICAL_NUM; ++r)
   for (int c = 0; c < HORIZON_NUM; ++c)
   DrawRectangle(

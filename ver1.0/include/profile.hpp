@@ -36,6 +36,12 @@ namespace tetris
     coord operator+(const coord & other)  noexcept
       { return coord(x+other.x, y+other.y); }
 
+    coord& operator+=(const coord & other) noexcept
+      { x += other.x; y += other.y; return *this;}
+
+    coord& operator-=(const coord & other) noexcept
+      { x -= other.x; y -= other.y; return *this;}
+
     coord operator-(const coord & other)  noexcept 
       { return coord(x-other.x, y-other.y); }
 
