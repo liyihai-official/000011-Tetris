@@ -1,0 +1,53 @@
+///
+/// @file include/assert
+///
+#ifndef ASSERT
+#define ASSERT
+
+///
+/// ASSERT_TETRIS, ASSERT_TETRIS_MSG, ASSERT_TETRIS_IS_VOID
+///
+#undef ASSERT_TETRIS
+#undef ASSERT_TETRIS_MSG
+#undef ASSERT_TETRIS_IS_VOID
+
+#if defined (ASSERT_TETRIS_DISABLE) || defined(NDEBUG)
+
+#define ASSERT_TETRIS(expr) ((void)0)
+#define ASSERT_TETRIS_MSG(expr, msg) ((void)0)
+#define ASSERT_TETRIS_IS_VOID
+
+
+#else
+#pragma once
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
+
+#define ASSERT_TETRIS(expr) \
+  if (!(expr)) { \
+    std::cerr << "Assertion Failed: " #expr \
+              << ", file " << __FILE__ \
+              << ", line " << __LINE__ \
+              << std::endl; \
+    assert(expr);  \
+  }
+
+
+#define ASSERT_TETRIS_MSG(expr, msg) \
+  if (!(expr)) { \
+    std::cerr << "Assertion Failed: " #expr \
+              << ", message : " << msg \
+              << ", file " << __FILE__ \
+              << ", line " << __LINE__ \
+              << std::endl; \
+    assert(expr);  \
+  }
+
+#if defined(NDEBUG)
+#define ASSERT_TETRIS_IS_VOID
+#endif 
+
+#endif // end of define ASSERT_TETRIS, ASSERT_TETRIS_MSG, ASSERT_TETRIS_IS_VOID
+
+#endif // define ASSERT

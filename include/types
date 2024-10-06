@@ -1,0 +1,30 @@
+///
+/// @file include/types
+#pragma once
+#ifndef TYPES
+#define TYPES
+
+#include <string>
+#include <array>
+
+
+namespace tetris {
+  using Float = float;
+  using Word  = uint16_t;
+  using Dword = uint32_t;
+
+  typedef std::size_t size_type;
+}
+
+
+
+namespace tetris
+{
+
+
+
+} // namespace tetris
+
+
+
+#endif // define TYPES
