@@ -9,7 +9,13 @@
 
 #define NX 1504
 #define NY 846
-
+namespace tetris { namespace utility
+{
+  class Matrix;
+  class Grid_World;
+  class Tetromino;
+} // namespace utility
+} // namespace tetris
 
 namespace tetris { namespace utility
 {
@@ -72,7 +78,6 @@ class Matrix
 
 }; // Matrix
 
-
 class Grid_World
 {
   private:
@@ -97,7 +102,7 @@ class Grid_World
   // Other Features
   public:
   void ClearFullRows();
-  void UpdateUpperBounds();
+  void FixToGrid(const Tetromino &);
   void Draw();
 
 
@@ -106,7 +111,6 @@ class Grid_World
 
   friend std::ostream & operator<< (std::ostream &, const Grid_World &);
 }; // end of class Grid_World
-
 
 
 class Tetromino
@@ -118,19 +122,27 @@ class Tetromino
   Tetromino(Tetromino &&)                 noexcept;
   Tetromino& operator=(Tetromino &&)      noexcept;
 
+  value_type& operator()(size_type x, size_type y) { return NESW[idx](x, y); }
+  const value_type& operator()(size_type x, size_type y) const { return NESW[idx](x, y); }
 
   public:
-  void move();
+  void move(value_type);
   void Draw();
   bool isCollision(Grid_World &);
 
+  value_type & x() { return coord(0, 0); }
+  const value_type & x() const { return coord(0, 0); }
+  value_type & y() { return coord(0, 1); }
+  const value_type & y() const { return coord(0, 1); }
 
   private:
+  static constexpr size_type count {4};
   std::vector<Matrix> NESW;
   Tetromino_type type;
   Matrix coord;
   size_type idx;
   std::vector<Matrix> Move;
+  value_type move_interval {1.0f}, timer {0.0f};
 }; // end of class Tetromino
 
 }}
@@ -143,44 +155,43 @@ inline
 void 
 Tetromino::Draw()
 {
-  for (size_type i = 0; i < 4; ++i)
-  {
-    for (size_type j = 0; j < 4; ++j)
-    {
-      if (NESW[idx](i,j) != 0)
-      {
-        DrawRectangle((i+coord(0, 0)) * 30, (j+coord(0, 1)) * 30, 30, 30, GRAY); // 绘制每个方块
-      }
-    }
-  }
+for (size_type i = 0; i < count; ++i)
+for (size_type j = 0; j < count; ++j)
+if (NESW[idx](i,j) != 0)
+DrawRectangle((i+coord(0, 0)) * 30, (j+coord(0, 1)) * 30, 30, 30, GRAY); // 绘制每个方块
 }
 
 inline 
 void 
-Tetromino::move()
+Tetromino::move(value_type delta_time)
 {
-  coord += Move[2];
-  if (IsKeyDown(KEY_RIGHT)) coord += Move[0];
-  if (IsKeyDown(KEY_LEFT))  coord += Move[1];
-  if (IsKeyDown(KEY_DOWN))  coord += Move[2];
-  if (IsKeyDown(KEY_UP))    ++idx; idx = idx % 4;
-  std::cout << idx << " " << coord << std::endl;
+  timer += delta_time;
+  if (timer >= move_interval)
+  {
+    coord += Move[2];
+    if (IsKeyDown(KEY_RIGHT)) coord += Move[0];
+    if (IsKeyDown(KEY_LEFT))  coord += Move[1];
+    if (IsKeyDown(KEY_DOWN))  coord += Move[2];
+    timer = 0.0f;
+  }
+  if (IsKeyDown(KEY_UP))    ++idx; idx = idx % count;
 }
 
 inline 
 bool
 Tetromino::isCollision(Grid_World & Grid)
 {
-  for (size_type i = 0; i < 4; ++i)
+  for (size_type i = 0; i < count; ++i)
   {
-    for (size_type j = 0; j < 4; ++j)
+    for (size_type j = 0; j < count; ++j)
     {
       if (NESW[idx](i,j) != 0)
       {
-        size_type newX = coord(0, 0) + j;
-        size_type newY = coord(0, 1) + i;
-        if (newX < 0 || newX >= Grid.nx || Grid.ny || Grid(newX, newY) != 0) 
-        { return true; }
+        
+size_type newX = this->x() + i;
+size_type newY = this->y() + j;
+if (newX < 0 || newY < 0 || newX+1 >= Grid.nx || newY+1 >= Grid.ny || Grid(newX, newY) != 0) 
+{ return true; }
       }
     }
   }
@@ -198,70 +209,70 @@ noexcept
       {1, 2, {{0, 1}}},
     }}
 {
-  NESW.reserve(4);
+  NESW.reserve(count);
   switch (type)
   {
 case L      : 
   std::cout << "Type: L " << std::endl;
   NESW = {{
-    {4, 4, {{ 0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
-    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
-    {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {1, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
-    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+    {count, count, {{ 0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {count, count, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {count, count, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {1, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {count, count, {{ 1, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 case J   :
   std::cout << "Type: J" << std::endl;
   NESW = {{
-    {4, 4, {{ 1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
-    {4, 4, {{ 0, 1, 1, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
-    {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 南
-    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+    {count, count, {{ 1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {count, count, {{ 0, 1, 1, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+    {count, count, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 南
+    {count, count, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 case Z      :
   std::cout << "Type: Z " << std::endl;
   NESW = {{
-    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
-    {4, 4, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
-    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
-    {4, 4, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+    {count, count, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {count, count, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+    {count, count, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {count, count, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 case S   :
   std::cout << "Type: S " << std::endl;
   NESW = {{
-    {4, 4, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
-    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 东
-    {4, 4, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
-    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}  // 西
+    {count, count, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {count, count, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {count, count, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {count, count, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 case O   :
   std::cout << "Type: O " << std::endl;
   NESW = {{
-    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 北
-    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
-    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 南
-    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}  // 西
+    {count, count, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 北
+    {count, count, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {count, count, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 南
+    {count, count, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 case I    :
   std::cout << "Type: I " << std::endl;
   NESW = {{
-    {4, 4, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }}, // 
-    {4, 4, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }},
-    {4, 4, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }},
-    {4, 4, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }}
+    {count, count, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }}, // 
+    {count, count, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }},
+    {count, count, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }},
+    {count, count, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }}
   }};
   break;
 case T     :
   std::cout << "Type: T " << std::endl;
   NESW = {{
-      {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 北
-      {4, 4, {{ 0, 1, 0, 0}, {1, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
-      {4, 4, {{ 0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
-      {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+      {count, count, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 北
+      {count, count, {{ 0, 1, 0, 0}, {1, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+      {count, count, {{ 0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+      {count, count, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
   }};
   break;
 default     :
@@ -304,6 +315,24 @@ Grid_World::Draw()
         DrawRectangle(i * 30, j * 30, 30, 30, PURPLE); // 绘制每个方块
       }
       DrawRectangleLines(i * 30, j * 30, 30, 30, GRAY);
+    }
+  }
+}
+
+inline
+void 
+Grid_World::FixToGrid(const Tetromino & tetromino)
+{
+  for (size_type i = 0; i < 4; ++i)
+  {
+    for (size_type j = 0; j < 4; ++j)
+    {
+      if (tetromino(i, j) != 0)
+      {
+size_type x { static_cast<size_type>(tetromino.x()) + i };
+size_type y { static_cast<size_type>(tetromino.y()) + j };
+Grid(x, y) = tetromino(i, j);
+      }
     }
   }
 }

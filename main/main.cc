@@ -59,20 +59,31 @@ int main(int argc, char ** argv)
 
   while (!WindowShouldClose()) 
   {
+    float deltaTime = GetFrameTime();
+    T.move(deltaTime);
+    bool Coll = T.isCollision(gw);
+
+
     BeginDrawing();
     ClearBackground(WHITE);
 
     gw.Draw();
-    T.move();
-    T.Draw();
+    if (Coll) {
+      gw.FixToGrid(T);
+      // tetris::utility::Tetromino other;
+      // T = std::move(other);
+      // break;
+    }
+    else {
+      T.Draw();
+    }
+    std::cout << Coll << std::endl;
+    
     
 
-
-
     EndDrawing();
-    // sleep(1);
   }
-
+  CloseWindow();
   
   
 
