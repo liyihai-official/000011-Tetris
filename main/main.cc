@@ -15,9 +15,13 @@ void print(const std::initializer_list<T> list)
 
 int main(int argc, char ** argv)
 {
-  tetris::utility::Matrix Mat (3, 5);
-  Mat.fill();
+  tetris::utility::Matrix Mat (3, 5), other (3, 5);
+  Mat.fill(); other.fill();
   std::cout << Mat << std::endl;
+  Mat += other;
+  bool res = (Mat == other);
+  std::cout << res << std::endl;
+  
 
   // print({1.1, 2.2, 3.1, 3.0});
   // tetris::Matrix_slice<3> Slice (3, {3, 4, 5});

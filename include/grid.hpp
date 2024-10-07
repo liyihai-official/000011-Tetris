@@ -33,20 +33,29 @@ class Matrix
 
   // Other Operators
   public:
-  value_type operator()(size_type, size_type);
-  const value_type operator()(size_type, size_type) const;
+  value_type & operator()(size_type, size_type);
+  const value_type & operator()(size_type, size_type) const;
+
+  value_type & operator()(size_type);
+  const value_type & operator()(size_type) const;
 
   Matrix operator+(Matrix &&);
   Matrix operator+(const Matrix &);
 
-  // Matrix operator+=(Matrix &&);
-  // Matrix operator+=(const Matrix &);
+  Matrix& operator+=(Matrix &&);
+  Matrix& operator+=(const Matrix &);
+
+  Matrix operator*(Matrix &&);
+  Matrix operator*(const Matrix &);
+
+  Matrix& operator*=(Matrix &&);
+  Matrix& operator*=(const Matrix &);
 
   // bool operator==(Matrix &&);
   // bool operator==(const Matrix &);
 
-
   friend std::ostream & operator<< (std::ostream &, const Matrix &);
+
   // Profiling Features
   public:
   Dword size() const noexcept;
@@ -56,7 +65,8 @@ class Matrix
   public:
   void reset() noexcept;
   void fill()  noexcept;
-
+  void assign(value_type)   noexcept;
+  void assign(value_type &) noexcept;
 
 
 }; // Matrix
@@ -173,27 +183,146 @@ Matrix& Matrix::operator=(const Matrix & other)
 }
 
 inline 
-value_type Matrix::operator()(size_type ix, size_type jy)
-{ return body[ix*ny + jy]; }
+value_type & Matrix::operator()(size_type ix, size_type jy)
+{
+  if (ix*ny+jy < this->size()) return body[ix*ny + jy]; 
+  else  throw std::out_of_range("Index out of range.");
+}
 
 inline 
 const
-value_type Matrix::operator()(size_type ix, size_type jy) 
+value_type & Matrix::operator()(size_type ix, size_type jy) 
 const
-{ return body[ix*ny + jy]; }
+{
+  if (ix*ny+jy < this->size()) return body[ix*ny + jy]; 
+  else  throw std::out_of_range("Index out of range.");
+}
 
 
-// inline 
-// Matrix Matrix::operator+(Matrix && other)
-// {
-//   ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
-//   Matrix res {*this};
+inline 
+value_type & Matrix::operator()(size_type idx)
+{
+  if (idx < this->size()) return body[idx]; 
+  else  throw std::out_of_range("Index out of range.");
+}
+
+
+inline 
+const
+value_type & Matrix::operator()(size_type idx) 
+const
+{
+  if (idx < this->size()) return body[idx]; 
+  else  throw std::out_of_range("Index out of range.");
+}
+
+
+
+inline 
+Matrix Matrix::operator+(Matrix && other)
+{
+  ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
+  Matrix res {*this};
+  for (size_type i = 0; i < res.size(); ++i) res.body[i] = body[i] + other(i);
+  return res;
+}
+
+inline 
+Matrix Matrix::operator+(const Matrix & other)
+{
+  ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
+  Matrix res {*this};
+  for (size_type i = 0; i < res.size(); ++i) res.body[i] = body[i] + other(i);
+  return res;
+}
+
+inline 
+Matrix& Matrix::operator+=(Matrix && other)
+{
+  ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
+  for (size_type i = 0; i < this->size(); ++i) body[i] += other(i);
+  return *this;
+}
+
+inline 
+Matrix& Matrix::operator+=(const Matrix & other)
+{
+  ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
+  for (size_type i = 0; i < this->size(); ++i) body[i] += other(i);
+  return *this;
+}
+
+
+inline 
+Matrix Matrix::operator*(Matrix && other)
+{
+  ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
+  Matrix res(nx, other.ny);
+}
+
+
+inline 
+Matrix Matrix::operator*(const Matrix & other)
+{
+  ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
+  Matrix res(nx, other.ny);
+
+
+}
+
+inline 
+Matrix & Matrix::operator*=(Matrix && other)
+{
+  ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
+  Matrix res(nx, other.ny);
+
+
+
   
-//   return res;
-// }
-//   // Matrix operator+(const Matrix &);
+  return *this;
+}
+
+inline 
+Matrix & Matrix::operator*=(const Matrix & other)
+{
+  ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
+  Matrix res(nx, other.ny);
 
 
+
+
+  return *this;
+}
+
+
+
+
+
+inline 
+Dword Matrix::size() 
+const
+noexcept
+{ return nx*ny; }
+
+inline 
+void Matrix::reset()
+noexcept
+{ body = nullptr; nx = 0; ny = 0; }
+
+inline 
+void Matrix::fill()
+noexcept
+{ for (size_type i = 0; i < this->size(); ++i) body[i] = static_cast<value_type>(i); }
+
+inline 
+void Matrix::assign(value_type val)
+noexcept
+{ std::fill_n(body.get(), this->size(), val); }
+
+inline 
+void Matrix::assign(value_type & val)
+noexcept
+{ std::fill_n(body.get(), this->size(), val); }
 
 inline 
 std::ostream & operator<<(std::ostream & os, const Matrix & in)
@@ -215,22 +344,13 @@ std::ostream & operator<<(std::ostream & os, const Matrix & in)
 }
 
 
-inline 
-Dword Matrix::size() 
-const
-noexcept
-{ return nx*ny; }
-
-inline 
-void Matrix::reset()
-noexcept
-{ body = nullptr; nx = 0; ny = 0; }
-
-inline 
-void Matrix::fill()
-noexcept
-{ for (size_type i = 0; i < this->size(); ++i) body[i] = static_cast<value_type>(i); }
-
-
 } // namespace utility
 } // namespace tetris
+
+
+
+
+
+
+
+
