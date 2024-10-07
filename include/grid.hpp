@@ -4,18 +4,10 @@
 #include <types>
 #include <assert>
 #include <iostream>
-
+#include <iomanip>
 
 #define NX 1504
 #define NY 846
-
-// namespace tetris { namespace utility {
-
-
-
-
-// } // namespace utility
-// } // namespace tetris
 
 
 namespace tetris { namespace utility
@@ -26,12 +18,12 @@ namespace tetris { namespace utility
 class Matrix 
 {
   private:
-  std::unique_ptr<Float[]> body;
-  Word nx, ny;
+  std::unique_ptr<value_type[]> body;
+  size_type nx, ny;
 
   public:
-  Matrix()                            noexcept;
-  Matrix(const Word &, const Word &)  noexcept;
+  Matrix()                                      noexcept;
+  Matrix(const size_type &, const size_type &)  noexcept;
   ~Matrix()                           noexcept;
 
   Matrix(Matrix &&)                   noexcept;
@@ -41,8 +33,11 @@ class Matrix
 
   // Other Operators
   public:
-  // Matrix operator+(Matrix &&);
-  // Matrix operator+(const Matrix &);
+  value_type operator()(size_type, size_type);
+  const value_type operator()(size_type, size_type) const;
+
+  Matrix operator+(Matrix &&);
+  Matrix operator+(const Matrix &);
 
   // Matrix operator+=(Matrix &&);
   // Matrix operator+=(const Matrix &);
@@ -50,6 +45,8 @@ class Matrix
   // bool operator==(Matrix &&);
   // bool operator==(const Matrix &);
 
+
+  friend std::ostream & operator<< (std::ostream &, const Matrix &);
   // Profiling Features
   public:
   Dword size() const noexcept;
@@ -58,6 +55,7 @@ class Matrix
   // 
   public:
   void reset() noexcept;
+  void fill()  noexcept;
 
 
 
@@ -107,7 +105,7 @@ noexcept
 { std::cout << "Calling Default Constructor." << std::endl; }
 
 inline 
-Matrix::Matrix(const Word & nx, const Word & ny)
+Matrix::Matrix(const size_type & nx, const size_type & ny)
 noexcept
 : nx {nx}, ny {ny}, body { std::make_unique<Float[]>(nx*ny) }
 { std::cout << "Calling nx * ny Constructor." << std::endl;}
@@ -174,7 +172,47 @@ Matrix& Matrix::operator=(const Matrix & other)
   return *this;
 }
 
+inline 
+value_type Matrix::operator()(size_type ix, size_type jy)
+{ return body[ix*ny + jy]; }
 
+inline 
+const
+value_type Matrix::operator()(size_type ix, size_type jy) 
+const
+{ return body[ix*ny + jy]; }
+
+
+// inline 
+// Matrix Matrix::operator+(Matrix && other)
+// {
+//   ASSERT_TETRIS_MSG((other.nx == nx && other.ny == ny), "Add operator +, extents mismatch.");
+//   Matrix res {*this};
+  
+//   return res;
+// }
+//   // Matrix operator+(const Matrix &);
+
+
+
+inline 
+std::ostream & operator<<(std::ostream & os, const Matrix & in)
+{
+  for (size_type i = 0; i < in.nx; ++i)
+  {
+    std::cout << "| ";
+    for (size_type j = 0; j < in.ny; ++j)
+    {
+      std::cout << std::fixed 
+                << std::setw(9) 
+                << std::setprecision(3) 
+                << in(i,j) << " ";
+    }
+    std::cout << "|" << std::endl;;
+  }
+  std::cout << std::endl;
+  return os;
+}
 
 
 inline 
@@ -188,7 +226,10 @@ void Matrix::reset()
 noexcept
 { body = nullptr; nx = 0; ny = 0; }
 
-
+inline 
+void Matrix::fill()
+noexcept
+{ for (size_type i = 0; i < this->size(); ++i) body[i] = static_cast<value_type>(i); }
 
 
 } // namespace utility
