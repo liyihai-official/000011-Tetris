@@ -5,6 +5,7 @@
 #include <assert>
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 #define NX 1504
 #define NY 846
@@ -31,6 +32,9 @@ class Matrix
   Matrix& operator=(Matrix &&);
   Matrix& operator=(const Matrix &);
 
+  Matrix( const size_type &, const size_type &, 
+          std::initializer_list<std::initializer_list<value_type>>) noexcept;
+
   // Other Operators
   public:
   value_type & operator()(size_type, size_type);
@@ -51,57 +55,274 @@ class Matrix
   Matrix& operator*=(Matrix &&);
   Matrix& operator*=(const Matrix &);
 
-  // bool operator==(Matrix &&);
-  // bool operator==(const Matrix &);
-
   friend std::ostream & operator<< (std::ostream &, const Matrix &);
 
   // Profiling Features
   public:
-  Dword size() const noexcept;
-
+  size_type size() const noexcept;
 
   // 
   public:
-  void reset() noexcept;
-  void fill()  noexcept;
+  void reset()  noexcept;
+  void fill()   noexcept;
   void assign(value_type)   noexcept;
   void assign(value_type &) noexcept;
+  void swap(Matrix &)       noexcept;
 
 
 }; // Matrix
 
 
-// class Grid_World
-// {
-//   private:
+class Grid_World
+{
+  private:
+  Matrix Grid;
+
+  public:
+  Grid_World()                    noexcept = default; 
+  Grid_World(const Grid_World &)            noexcept;
+  Grid_World& operator=(const Grid_World &) noexcept;
+  Grid_World(Grid_World &&)                 noexcept;
+  Grid_World& operator=(Grid_World &&);
+  ~Grid_World() { std::cout << "Calling Grid World Destructor." << std::endl; }
 
 
-//   public:
-//   Grid_World();
-//   ~Grid_World() { std::cout << "Calling Grid World Destructor." << std::endl; }
+  Grid_World(size_type, size_type)  noexcept;
 
-//   Grid_World(Grid_World &&);
-//   Grid_World(const Grid_World &);
+  // Other Operators  
+  // ...
+  value_type& operator()(size_type x, size_type y) { return Grid(x, y); }
+  const value_type& operator()(size_type x, size_type y) const { return Grid(x, y); }
 
-//   Grid_World& operator=(Grid_World &&);
-//   Grid_World& operator=(const Grid_World &);
-
-
-//   public:
-//   void ClearFullRows();
-//   void UpdateUpperBounds();
+  // Other Features
+  public:
+  void ClearFullRows();
+  void UpdateUpperBounds();
+  void Draw();
 
 
+  public:
+  size_type nx, ny;
 
-//   private:
+  friend std::ostream & operator<< (std::ostream &, const Grid_World &);
+}; // end of class Grid_World
 
 
 
+class Tetromino
+{
+  public:
+  Tetromino()                             noexcept;
+  Tetromino(const Tetromino &)            noexcept;
+  Tetromino& operator=(const Tetromino &) noexcept;
+  Tetromino(Tetromino &&)                 noexcept;
+  Tetromino& operator=(Tetromino &&)      noexcept;
 
 
-// }; // Grid_World
+  public:
+  void move();
+  void Draw();
+  bool isCollision(Grid_World &);
+
+
+  private:
+  std::vector<Matrix> NESW;
+  Tetromino_type type;
+  Matrix coord;
+  size_type idx;
+  std::vector<Matrix> Move;
+}; // end of class Tetromino
+
 }}
+
+
+namespace tetris { namespace utility
+{
+
+inline 
+void 
+Tetromino::Draw()
+{
+  for (size_type i = 0; i < 4; ++i)
+  {
+    for (size_type j = 0; j < 4; ++j)
+    {
+      if (NESW[idx](i,j) != 0)
+      {
+        DrawRectangle((i+coord(0, 0)) * 30, (j+coord(0, 1)) * 30, 30, 30, GRAY); // 绘制每个方块
+      }
+    }
+  }
+}
+
+inline 
+void 
+Tetromino::move()
+{
+  coord += Move[2];
+  if (IsKeyDown(KEY_RIGHT)) coord += Move[0];
+  if (IsKeyDown(KEY_LEFT))  coord += Move[1];
+  if (IsKeyDown(KEY_DOWN))  coord += Move[2];
+  if (IsKeyDown(KEY_UP))    ++idx; idx = idx % 4;
+  std::cout << idx << " " << coord << std::endl;
+}
+
+inline 
+bool
+Tetromino::isCollision(Grid_World & Grid)
+{
+  for (size_type i = 0; i < 4; ++i)
+  {
+    for (size_type j = 0; j < 4; ++j)
+    {
+      if (NESW[idx](i,j) != 0)
+      {
+        size_type newX = coord(0, 0) + j;
+        size_type newY = coord(0, 1) + i;
+        if (newX < 0 || newX >= Grid.nx || Grid.ny || Grid(newX, newY) != 0) 
+        { return true; }
+      }
+    }
+  }
+  return false;
+}
+
+inline 
+Tetromino::Tetromino() 
+noexcept
+: type {static_cast<Tetromino_type>(rng(rde))},
+  coord {1, 2, {{0, 0}}}, idx {0}, 
+  Move {{
+      {1, 2, {{1, 0}}},
+      {1, 2, {{-1, 0}}},
+      {1, 2, {{0, 1}}},
+    }}
+{
+  NESW.reserve(4);
+  switch (type)
+  {
+case L      : 
+  std::cout << "Type: L " << std::endl;
+  NESW = {{
+    {4, 4, {{ 0, 0, 1, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {1, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+case J   :
+  std::cout << "Type: J" << std::endl;
+  NESW = {{
+    {4, 4, {{ 1, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {4, 4, {{ 0, 1, 1, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+    {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 南
+    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 0, 0}, {1, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+case Z      :
+  std::cout << "Type: Z " << std::endl;
+  NESW = {{
+    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {4, 4, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+    {4, 4, {{ 1, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {4, 4, {{ 0, 0, 1, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+case S   :
+  std::cout << "Type: S " << std::endl;
+  NESW = {{
+    {4, 4, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 北
+    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {4, 4, {{ 0, 1, 1, 0}, {1, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+    {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+case O   :
+  std::cout << "Type: O " << std::endl;
+  NESW = {{
+    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 北
+    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 东
+    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}, // 南
+    {4, 4, {{ 0, 0, 0, 0}, {0, 1, 1, 0}, {0, 1, 1, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+case I    :
+  std::cout << "Type: I " << std::endl;
+  NESW = {{
+    {4, 4, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }}, // 
+    {4, 4, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }},
+    {4, 4, { {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {0, 1, 0, 0} }},
+    {4, 4, { {0, 0, 0, 0}, {1, 1, 1, 1}, {0, 0, 0, 0}, {0, 0, 0, 0} }}
+  }};
+  break;
+case T     :
+  std::cout << "Type: T " << std::endl;
+  NESW = {{
+      {4, 4, {{ 0, 0, 0, 0}, {1, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 北
+      {4, 4, {{ 0, 1, 0, 0}, {1, 1, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}, // 东
+      {4, 4, {{ 0, 1, 0, 0}, {1, 1, 1, 0}, {0, 0, 0, 0}, {0, 0, 0, 0 }}}, // 南
+      {4, 4, {{ 0, 1, 0, 0}, {0, 1, 1, 0}, {0, 1, 0, 0}, {0, 0, 0, 0 }}}  // 西
+  }};
+  break;
+default     :
+  std::cout << "Unknown Type " << std::endl;
+  break;
+  }
+  
+}
+
+
+} // namespace utility
+} // namespace tetris
+
+
+
+namespace tetris { namespace utility
+{
+
+inline 
+Grid_World::Grid_World(size_type nx, size_type ny) 
+noexcept
+: Grid {Matrix(nx, ny)}, nx {nx}, ny {ny}
+{ Grid.assign(0); }
+
+
+inline 
+void 
+Grid_World::Draw()
+{
+  for (size_type i = 0; i < nx; ++i)
+  {
+    for (size_type j = 0; j < ny; ++j)
+    {
+      if (Grid(i,j) != 0)
+      {
+        DrawRectangle(i * 30, j * 30, 30, 30, GRAY); // 绘制每个方块
+      }
+      else 
+      {
+        DrawRectangle(i * 30, j * 30, 30, 30, PURPLE); // 绘制每个方块
+      }
+      DrawRectangleLines(i * 30, j * 30, 30, 30, GRAY);
+    }
+  }
+}
+
+inline
+std::ostream & operator<< (std::ostream & os, const Grid_World & in)
+{
+  os << "Grid World: " << "\n" << in.Grid;
+  // for (auto const & elem : in.UpperBoundary) os << elem << " ";
+  // os << "\n";
+  return os;
+}
+
+} // namespace utility
+} // namespace tetris
+
+
+
+
 
 
 namespace tetris { namespace utility
@@ -119,6 +340,21 @@ Matrix::Matrix(const size_type & nx, const size_type & ny)
 noexcept
 : nx {nx}, ny {ny}, body { std::make_unique<Float[]>(nx*ny) }
 { std::cout << "Calling nx * ny Constructor." << std::endl;}
+
+inline 
+Matrix::Matrix(const size_type & nx, const size_type & ny, 
+                std::initializer_list<std::initializer_list<value_type>> list)
+noexcept
+: nx {nx}, ny {ny}, body { std::make_unique<Float[]>(nx*ny) }
+{ 
+  std::cout << "Calling list Constructor." << std::endl; 
+  size_type i {0};
+  for (const auto& row : list) 
+    for (const auto& element : row) 
+      if (i < nx * ny)  body[i++] = element;
+}
+
+
 
 inline 
 Matrix::~Matrix() 
@@ -258,6 +494,13 @@ Matrix Matrix::operator*(Matrix && other)
 {
   ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
   Matrix res(nx, other.ny);
+  res.assign(0);
+  for (size_type i = 0; i < nx; ++i)
+    for (size_type j = 0; j < other.ny; ++j)
+      for (size_type k = 0; k < ny; ++k)
+        res(i,j) += (*this)(i, k) * other(k, j);
+
+  return res;
 }
 
 
@@ -267,7 +510,13 @@ Matrix Matrix::operator*(const Matrix & other)
   ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
   Matrix res(nx, other.ny);
 
+  res.assign(0);
+  for (size_type i = 0; i < nx; ++i)
+    for (size_type j = 0; j < other.ny; ++j)
+      for (size_type k = 0; k < ny; ++k)
+        res(i,j) += (*this)(i, k) * other(k, j);
 
+  return res;
 }
 
 inline 
@@ -276,9 +525,13 @@ Matrix & Matrix::operator*=(Matrix && other)
   ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
   Matrix res(nx, other.ny);
 
+  res.assign(0);
+  for (size_type i = 0; i < nx; ++i)
+    for (size_type j = 0; j < other.ny; ++j)
+      for (size_type k = 0; k < ny; ++k)
+        res(i,j) += (*this)(i, k) * other(k, j);
 
-
-  
+  *this = std::move(res);
   return *this;
 }
 
@@ -288,9 +541,13 @@ Matrix & Matrix::operator*=(const Matrix & other)
   ASSERT_TETRIS_MSG((other.nx == ny), "Multiply operator *, extents mismatch.");
   Matrix res(nx, other.ny);
 
+  res.assign(0);
+  for (size_type i = 0; i < nx; ++i)
+    for (size_type j = 0; j < other.ny; ++j)
+      for (size_type k = 0; k < ny; ++k)
+        res(i,j) += (*this)(i, k) * other(k, j);
 
-
-
+  *this = std::move(res);
   return *this;
 }
 
@@ -299,7 +556,7 @@ Matrix & Matrix::operator*=(const Matrix & other)
 
 
 inline 
-Dword Matrix::size() 
+size_type Matrix::size() 
 const
 noexcept
 { return nx*ny; }
@@ -308,6 +565,21 @@ inline
 void Matrix::reset()
 noexcept
 { body = nullptr; nx = 0; ny = 0; }
+
+inline
+void Matrix::swap(Matrix & other)
+noexcept
+{
+  body.swap(other.body);
+  size_type pool { nx };
+  nx = other.nx;
+  other.nx = pool;
+
+  pool = ny;
+  ny = other.ny;
+  other.ny = pool;
+}
+
 
 inline 
 void Matrix::fill()
@@ -327,19 +599,20 @@ noexcept
 inline 
 std::ostream & operator<<(std::ostream & os, const Matrix & in)
 {
+  
   for (size_type i = 0; i < in.nx; ++i)
   {
-    std::cout << "| ";
+    os << "| ";
     for (size_type j = 0; j < in.ny; ++j)
     {
-      std::cout << std::fixed 
-                << std::setw(9) 
-                << std::setprecision(3) 
-                << in(i,j) << " ";
+      os  << std::fixed 
+          << std::setw(3) 
+          << std::setprecision(0) 
+          << in(i,j) << " ";
     }
-    std::cout << "|" << std::endl;;
+    os << "|" << "\n";
   }
-  std::cout << std::endl;
+  os << std::endl;
   return os;
 }
 

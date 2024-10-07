@@ -6,15 +6,21 @@
 
 #include <string>
 #include <array>
-
+#include <random>
 
 namespace tetris {
   using Float = float;
-  using Word  = uint16_t;
-  using Dword = uint32_t;
+  using Byte    = uint8_t;
+  using Word    = uint16_t;
+  using Dword   = uint32_t;
+  using Qword   = uint64_t;
 
   typedef std::size_t size_type;
   typedef Float       value_type;
+
+  std::mt19937 rde {42};
+  std::uniform_int_distribution<int> rng(0, 6);
+
 }
 
 
@@ -22,7 +28,11 @@ namespace tetris {
 namespace tetris
 {
 
+  enum Tetromino_type   : Byte
+  { L, J, Z, S, O, I, T }; // enumerate Tetromino_type
 
+  enum class cell_color 
+  { Black, White, Blue, Red, Green, Yellow, Purple };
 
 } // namespace tetris
 
