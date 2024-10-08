@@ -19,7 +19,7 @@ namespace tetris {
   typedef Float       value_type;
 
   std::mt19937 rde {42};
-  std::uniform_int_distribution<int> rng(0, 6);
+  // std::uniform_int_distribution<int> rng(0, 6);
 
 }
 

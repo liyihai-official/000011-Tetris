@@ -126,6 +126,7 @@ class Tetromino
   const value_type& operator()(size_type x, size_type y) const { return NESW[idx](x, y); }
 
   public:
+  void reset() noexcept;
   void move(value_type);
   void Draw();
   bool isCollision(Grid_World &);
@@ -136,6 +137,8 @@ class Tetromino
   const value_type & y() const { return coord(0, 1); }
 
   private:
+  std::uniform_int_distribution<int> rng;
+  std::mt19937 rde {42};
   static constexpr size_type count {4};
   std::vector<Matrix> NESW;
   Tetromino_type type;
@@ -143,6 +146,7 @@ class Tetromino
   size_type idx;
   std::vector<Matrix> Move;
   value_type move_interval {1.0f}, timer {0.0f};
+
 }; // end of class Tetromino
 
 }}
@@ -199,9 +203,20 @@ if (newX < 0 || newY < 0 || newX+1 >= Grid.nx || newY+1 >= Grid.ny || Grid(newX,
 }
 
 inline 
+void 
+Tetromino::reset()
+noexcept
+{
+  type = static_cast<Tetromino_type>(rng(rde));
+  coord = {1, 2, {{0, 1}}};
+  idx = 1;
+}
+
+inline 
 Tetromino::Tetromino() 
 noexcept
-: type {static_cast<Tetromino_type>(rng(rde))},
+: rng {std::uniform_int_distribution<int> (0, 6)},
+  type {static_cast<Tetromino_type>(rng(rde))},
   coord {1, 2, {{0, 0}}}, idx {0}, 
   Move {{
       {1, 2, {{1, 0}}},
