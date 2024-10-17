@@ -1,14 +1,16 @@
 import numpy as np
 import tetris.tetris as tetris
 
+# import time
+# import example
 
 
 def main():
-  Grid = tetris.GridWorld(10, 20)
+  # Grid = tetris.GridWorld(10, 20)
   # print()
 
 
-  Block = tetris.Block("S")
+  # Block = tetris.Block("S")
 
   # Grid.grid[1:(1+4), 3:(3+4)] += Block.block
   # print(Block)
@@ -17,14 +19,16 @@ def main():
 
   # print(Block)
 
-  # BL = tetris.BlockLists()
-  # BL.append("L")
-  # BL.append("O")
-  # BL.append("T")
+  profile = tetris.Settings()
 
-  # BL.print_list()
+  BL = tetris.BlockLists(profile=profile)
+  BL.append("L")
+  BL.append("O")
+  BL.append("T")
 
-  print(Grid.grid)
+  BL.print_list()
+
+  # print(Grid.grid)
 
  
 
