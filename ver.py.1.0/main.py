@@ -1,12 +1,12 @@
 import numpy as np
 import tetris.tetris as tetris
-
+import time
 # import time
 # import example
 
 
 def main():
-  # Grid = tetris.GridWorld(10, 20)
+  
   # print()
 
 
@@ -20,17 +20,28 @@ def main():
   # print(Block)
 
   profile = tetris.Settings()
+  Grid = tetris.GridWorld(profile)
 
   BL = tetris.BlockLists(profile=profile)
-  BL.append("L")
+  # BL.append("L")
   BL.append("O")
   BL.append("T")
 
   BL.print_list()
+  
+  # print(Grid)
+  # BL.print_list()
 
-  # print(Grid.grid)
+  while not profile.GameIsOver:
+    print(Grid, flush=True)
+    
+    # if True: BL.join(Grid)
+    # print(BL.TouchBottom(Grid))
 
- 
+    if not profile.GameIsStarted: BL.join(Grid)
+
+    # BL.head.__move__("N", profile.GameSpeed)
+    time.sleep(1)
 
   
 
